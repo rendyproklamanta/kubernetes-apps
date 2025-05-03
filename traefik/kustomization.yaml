@@ -1,0 +1,6 @@
+
+resources:
+  - traefik-daemonset.yaml
+  - traefik-dashboard-auth.yaml
+  - traefik-dashboard-ingressroute.yaml
+  - cert-manager.yaml
