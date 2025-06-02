@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: myproject-deployment
+   namespace: myproject
+spec:
+  replicas: 1 # Min 2 to ensure availability
+  selector:
+    matchLabels:
+      app: myproject-deployment
+  progressDeadlineSeconds: 300
+  strategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxUnavailable: 1 # Keep 1 pod running during update
+        maxSurge: 1
+  template:
+      metadata:
+        labels:
+            app: myproject-deployment
+      spec:
+        imagePullSecrets:
+            - name: gitlab-token
+        # affinity:
+        #   podAntiAffinity:
+        #     requiredDuringSchedulingIgnoredDuringExecution:
+        #       - labelSelector:
+        #           matchExpressions:
+        #             - key: "app"
+        #               operator: In
+        #               values:
+        #                 - myproject-deployment
+        #         topologyKey: "kubernetes.io/hostname"  # Spread across nodes
+        containers:
+            - name: myproject-deployment
+              image: repo.cic-webpro.com:5050/project/movinite/myproject:production
+              imagePullPolicy: Always
+              resources:
+                requests:
+                  memory: 50Mi
+                  cpu: "0.25"
+                limits:
+                  memory: 500Mi
+                  cpu: "1"
+              ports:
+                - containerPort: 80
+              startupProbe:
+                tcpSocket:
+                  port: 80
+                initialDelaySeconds: 20
+                periodSeconds: 10
+                failureThreshold: 3
+              readinessProbe:
+                httpGet:
+                  path: /
+                  port: 80
+                initialDelaySeconds: 5
+                periodSeconds: 10
+                failureThreshold: 3
+        terminationGracePeriodSeconds: 120
+        tolerations:
+            - effect: NoExecute
+              key: node.kubernetes.io/unreachable
+              operator: Exists
+              tolerationSeconds: 0
+            - effect: NoExecute
+              key: node.kubernetes.io/not-ready
+              operator: Exists
+              tolerationSeconds: 0

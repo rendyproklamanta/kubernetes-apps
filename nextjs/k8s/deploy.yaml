@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextjs-app
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      name: nextjs-app
+  template:
+    metadata:
+      labels:
+        name: nextjs-app
+    spec:
+      imagePullSecrets:
+        - name: github-token # Change this with your registry hosting, ex : github-token, gitlab-token, dockerhub-token
+      containers:
+        - name: nextjs-app
+          image: ghcr.io/rendyproklamanta/kubernetes-nextjs:latest
+          ports:
+            - containerPort: 3000
+          imagePullPolicy: Always
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            periodSeconds: 5
+            timeoutSeconds: 1
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            periodSeconds: 5
+            timeoutSeconds: 1
+            initialDelaySeconds: 45
+          env:
+            - name: STARTUP_DELAY_SECONDS
+              value: "40"
+      tolerations:
+        - key: "node.kubernetes.io/unreachable"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 0
+        - key: "node.kubernetes.io/not-ready"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 0
+      terminationGracePeriodSeconds: 60
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nextjs-service
+spec:
+  selector:
+    name: nextjs-app
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 3000
+  # externalTrafficPolicy: Cluster
+  # type: LoadBalancer

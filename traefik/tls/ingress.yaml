@@ -1,0 +1,26 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+   annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect@kubernetescrd,traefik-security@kubernetescrd
+   name: mydomain-ingress
+   namespace: mydomain
+
+spec:
+   rules:
+      - host: "mydomain.com"
+        http:
+           paths:
+              - backend:
+                   service:
+                      name: mydomain-service
+                      port:
+                         number: 80
+                path: /
+                pathType: Prefix
+   tls:
+      - hosts:
+           - "mydomain.com"
+        secretName: mydomain.com-tls

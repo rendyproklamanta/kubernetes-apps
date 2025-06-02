@@ -1,0 +1,9 @@
+- Click project repo
+- Setting > Repository (in left sidebar)
+- Create deploy token
+- Checklist all
+- Run in kubectl
+
+```
+kubectl create secret docker-registry gitlab-token --docker-server="repo.cic-webpro.com:5050" --docker-username="myproject" --docker-password="ZdTzhibmcUBFs9xtZWH_" -n myproject
+```

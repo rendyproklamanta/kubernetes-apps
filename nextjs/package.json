@@ -1,0 +1,22 @@
+{
+  "name": "nextjs-docker",
+  "version": "1.0.0",
+  "description": "Node - Next.js - Next - React - SSR - Docker",
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "npx next telemetry disable",
+    "dev": "next",
+    "start": "next start",
+    "build": "next build"
+  },
+  "dependencies": {
+    "next": "^12.1.0",
+    "react": "^17.0.0",
+    "react-dom": "^17.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.24",
+    "@types/react": "^18.0.5",
+    "typescript": "^4.6.3"
+  }
+}
