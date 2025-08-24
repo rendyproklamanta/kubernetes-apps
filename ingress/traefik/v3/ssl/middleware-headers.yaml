@@ -1,0 +1,25 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: headers-secure
+  namespace: traefik
+spec:
+  headers:
+    browserXssFilter: true
+    contentTypeNosniff: true
+    frameDeny: true
+    stsIncludeSubdomains: true
+    stsPreload: true
+    stsSeconds: 31536000
+    referrerPolicy: "origin-when-cross-origin"
+    accessControlAllowOriginList:
+      - "*"
+    accessControlAllowMethods:
+      - "*"
+    accessControlAllowHeaders:
+      - "*"
+    customFrameOptionsValue: "SAMEORIGIN"
+    customResponseHeaders:
+      server: ""
+      x-powered-by: ""

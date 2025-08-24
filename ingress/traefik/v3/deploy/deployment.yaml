@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: mydomain-deployment
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: mydomain-deployment
+  template:
+    metadata:
+      labels:
+        app: mydomain-deployment
+    spec:
+      containers:
+        - name: hello-world
+          image: nginxdemos/hello:plain-text
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mydomain-service
+  namespace: default
+spec:
+  type: ClusterIP
+  selector:
+    app: mydomain-deployment
+  ports:
+    - port: 80
+      targetPort: 80
