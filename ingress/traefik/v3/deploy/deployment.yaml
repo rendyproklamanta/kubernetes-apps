@@ -1,32 +1,93 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: mydomain-deployment
+  name: hello-world
   namespace: default
 spec:
+  updateStrategy: 
+    type: RollingUpdate 
+    rollingUpdate: 
+      maxUnavailable: 0 
+      maxSurge: 1
+  # replicas: 2 # More replicas for better availability
+  # strategy:
+  #   type: RollingUpdate
+  #   rollingUpdate:
+  #     maxUnavailable: 1 # Allow 1 pod to be unavailable
+  #     maxSurge: 1 # Create 3 extra pods during update
   selector:
     matchLabels:
-      app: mydomain-deployment
+      app: hello-world
   template:
     metadata:
       labels:
-        app: mydomain-deployment
+        app: hello-world
     spec:
+      # affinity:
+      #   podAntiAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution: # FORCE different nodes
+      #       - labelSelector:
+      #           matchLabels: # Use matchLabels instead of matchExpressions
+      #             app: hello-world
+      #         topologyKey: "kubernetes.io/hostname"
       containers:
         - name: hello-world
           image: nginxdemos/hello:plain-text
           ports:
             - containerPort: 80
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "50Mi"
+            limits:
+              cpu: "100m"
+              memory: "200Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 0 # Startup probe handles initial delay
+            periodSeconds: 1 # Check every second
+            timeoutSeconds: 2 # 2 second timeout
+            successThreshold: 1 # Ready immediately on first success
+            failureThreshold: 1 # Fail immediately on first failure
+          # Graceful shutdown handling
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 15;"]
+      terminationGracePeriodSeconds: 45
+      tolerations:
+        - key: "node.kubernetes.io/not-ready"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 0 # Evict pods after 10 seconds
+        - key: "node.kubernetes.io/unreachable"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 0 # Evict pods after 10 seconds
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: hello-world-pdb
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: hello-world
+  minAvailable: 1
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mydomain-service
+  name: hello-world
   namespace: default
 spec:
   type: ClusterIP
   selector:
-    app: mydomain-deployment
+    app: hello-world
   ports:
     - port: 80
       targetPort: 80

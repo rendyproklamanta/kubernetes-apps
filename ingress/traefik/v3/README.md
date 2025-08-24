@@ -31,13 +31,16 @@ helm upgrade --install --namespace=crowdsec crowdsec crowdsec/crowdsec --values=
 
 ### Deploy Sample app
 ```
-kubectl apply -f deploy/certificate.yaml
-kubectl apply -f deploy/deployment.yaml
-kubectl apply -f deploy/ingress.yaml
+kubectl apply -k deploy
 ```
 
 ### Get Logs
 ```
 kubectl get events -n traefik --sort-by='.metadata.creationTimestamp'
-kubectl --kubeconfig=docsavespeople.yaml get all -n traefik
+kubectl get all -n traefik
+```
+
+### Test rolling update
+```
+kubectl set image ds/hello-world hello-world=nginxdemos/hello:0.1 -n default
 ```

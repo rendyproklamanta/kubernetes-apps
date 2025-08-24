@@ -41,18 +41,18 @@ persistence:
 
 resources:
   requests:
-    cpu: 50m
-    memory: 64Mi
+    cpu: "50m"
+    memory: "50Mi"
   limits:
-    cpu: 200m
-    memory: 256Mi
+    cpu: "100m"
+    memory: "200Mi"
 
 # Create an IngressRoute for the dashboard
 ingressRoute:
   dashboard:
     enabled: true
-    # Custom match rule with host domain
-    matchRule: Host(`192.168.1.0`)
+    # Change to IP load balancer
+    matchRule: Host(`192.168.0.1`)
     entryPoints: ["web"]
     middlewares:
       - name: traefik-dashboard-auth
@@ -77,8 +77,8 @@ extraObjects:
       basicAuth:
         secret: traefik-dashboard-auth-secret
 
-experimental:
-  plugins:
-    # bouncer:
-    #   moduleName: "github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin"
-    #   version: "v1.3.0"
+# experimental:
+#   plugins:
+#     bouncer:
+#       moduleName: "github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin"
+#       version: "v1.3.0"
