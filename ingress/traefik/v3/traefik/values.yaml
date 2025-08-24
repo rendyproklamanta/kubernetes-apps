@@ -51,7 +51,7 @@ resources:
 ingressRoute:
   dashboard:
     enabled: true
-    # Custom match rule with host domain
+    # Change IP with Load Balancer IP
     matchRule: Host(`192.168.1.0`)
     entryPoints: ["web"]
     middlewares:
@@ -77,8 +77,8 @@ extraObjects:
       basicAuth:
         secret: traefik-dashboard-auth-secret
 
-experimental:
-  plugins:
+# experimental:
+  # plugins:
     # bouncer:
     #   moduleName: "github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin"
     #   version: "v1.3.0"
