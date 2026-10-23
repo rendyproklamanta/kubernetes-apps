@@ -1,26 +1,43 @@
-## Deploy traefik, SSL and sample app
+## Deploy traefik & SSL
 
-- Install Traefik
-```
-kubectl create namespace traefik
-helm repo add traefik https://traefik.github.io/charts
-helm repo update
-helm upgrade --install traefik traefik/traefik -n traefik -f traefik/values.yaml
-```
-
-- Install cert-manager
+# 1. Install cert-manager (skip if already installed in vultr)
 ```
 kubectl create namespace cert-manager
 kubectl apply --validate=false -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.0/cert-manager.crds.yaml
 helm template cert-manager jetstack/cert-manager --namespace cert-manager --version v1.13.0 | kubectl apply -f -
 ```
 
-- Configure SSL
+# 2. Configure SSL
 ```
-kubectl apply -k ssl
+kubectl --kubeconfig=kubeconfig.yaml apply -k ssl
 ```
 
-- Install Plugins (optionals)
+## Deploy Traefik v2
+
+- Create namespace
+```
+kubectl --kubeconfig=kubeconfig.yaml create namespace traefik
+```
+
+- Add repo Helm Traefik
+```
+helm repo add traefik https://traefik.github.io/charts
+helm repo update
+```
+
+- Install/upgrade Traefik menggunakan `traefik/values.yaml`
+  > Chart `traefik/traefik` terbaru sudah untuk Traefik v3 dan skema values-nya tidak cocok dengan `values.yaml` di sini (pakai `ports.*.redirectTo`, `ports.*.tls`, `logs`, dll). Pin ke chart `27.0.2` (kompatibel dengan app v2.11.x).
+```
+helm upgrade --install traefik traefik/traefik -n traefik -f traefik/values.yaml --version 27.0.2 --kubeconfig=kubeconfig.yaml
+```
+
+- Cek status deployment
+```
+kubectl --kubeconfig=kubeconfig.yaml get pods -n traefik
+kubectl --kubeconfig=kubeconfig.yaml get svc -n traefik
+```
+
+# Install Plugins (optionals)
 ```
 kubectl create ns crowdsec
 kubectl apply -f traefik/plugins.yml
